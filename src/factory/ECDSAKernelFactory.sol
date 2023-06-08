@@ -9,19 +9,29 @@ contract ECDSAKernelFactory {
     ECDSAValidator public immutable validator;
     IEntryPoint public immutable entryPoint;
 
-    constructor(KernelFactory _singletonFactory, ECDSAValidator _validator, IEntryPoint _entryPoint) {
+    address owner;
+
+    constructor(
+        KernelFactory _singletonFactory,
+        ECDSAValidator _validator,
+        IEntryPoint _entryPoint,
+        address _owner
+    ) {
         singletonFactory = _singletonFactory;
         validator = _validator;
         entryPoint = _entryPoint;
+        owner = _owner;
     }
 
-    function createAccount(address _owner, uint256 _index) external returns (EIP1967Proxy proxy) {
-        bytes memory data = abi.encodePacked(_owner);
+    function createAccount(
+        uint256 _index
+    ) external returns (EIP1967Proxy proxy) {
+        bytes memory data = abi.encodePacked(owner);
         proxy = singletonFactory.createAccount(validator, data, _index);
     }
 
-    function getAccountAddress(address _owner, uint256 _index) public view returns (address) {
-        bytes memory data = abi.encodePacked(_owner);
+    function getAccountAddress(uint256 _index) public view returns (address) {
+        bytes memory data = abi.encodePacked(owner);
         return singletonFactory.getAccountAddress(validator, data, _index);
     }
 }
