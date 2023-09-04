@@ -26,6 +26,10 @@ using ERC4337Utils for EntryPoint;
 contract KernelMultiOwnedPatchTest1inch is KernelTestBase {
     address secondOwner;
     uint256 secondOwnerKey;
+
+    address taker;
+    uint256 takerKey;
+
     MultiECDSAFactoryPatch newFactory;
     MultiECDSAValidatorNew multiECDSAValidatorNew;
     address kernelImplementation;
@@ -51,6 +55,7 @@ contract KernelMultiOwnedPatchTest1inch is KernelTestBase {
         newFactory.setImplementation(kernelImplementation, true);
 
         (secondOwner, secondOwnerKey) = makeAddrAndKey("secondOwner");
+        (taker, takerKey) = makeAddrAndKey("taker");
         address[] memory owners = new address[](2);
         owners[0] = owner;
         owners[1] = secondOwner;
@@ -74,37 +79,49 @@ contract KernelMultiOwnedPatchTest1inch is KernelTestBase {
         address proxy = newFactory.createAccount(2);
 
         vm.startPrank(0xe7804c37c13166fF0b37F5aE0BB07A3aEbb6e245);
-        usdc.transfer(address(this), 2);
+        usdc.transfer(taker, 20);
         vm.stopPrank();
-        assertEq(usdc.balanceOf(address(this)), 2);
+        assertEq(usdc.balanceOf(taker), 20);
 
         vm.startPrank(0x0639556F03714A74a5fEEaF5736a4A64fF70D206);
-        usdt.transfer(proxy, 2);
+        usdt.transfer(proxy, 20);
         vm.stopPrank();
-        assertEq(usdt.balanceOf(proxy), 2);
+        assertEq(usdt.balanceOf(proxy), 20);
 
         vm.startPrank(proxy);
-        usdt.approve(address(limitOrderProtocol), 2);
+        usdt.approve(address(limitOrderProtocol), 20);
         vm.stopPrank();
+
+        assertEq(usdt.allowance(proxy, address(limitOrderProtocol)), 20);
+
+        vm.startPrank(taker);
+        usdc.approve(address(limitOrderProtocol), 20);
+        vm.stopPrank();
+
+        assertEq(usdc.allowance(taker, address(limitOrderProtocol)), 20);
 
         OrderLib.Order memory order = createOrder(
             1,
-            address(usdc),
             address(usdt),
+            address(usdc),
             proxy,
             address(0),
             address(0),
-            1,
-            1,
-            0x4000000000000000000000000000000000000000000000000000000000000000,
-            hex""
+            20,
+            20,
+            0,
+            bytes(hex"")
         );
 
         bytes32 orderHash = this.getOrderHash(order);
 
         bytes memory signature = signHash(orderHash, proxy);
 
-        limitOrderProtocol.fillOrder(order, signature, hex"", 1, 1, 0);
+        vm.startPrank(taker);
+        limitOrderProtocol.fillOrder(order, signature, hex"", 0, 20, 0);
+
+        assertEq(usdt.balanceOf(taker), 20);
+        assertEq(usdc.balanceOf(proxy), 20);
     }
 
     function getOrderHash(
@@ -140,6 +157,15 @@ contract KernelMultiOwnedPatchTest1inch is KernelTestBase {
 
         return newOrder;
     }
+
+    // function encodeArbitraryCall() {
+    //     bytes memory arbitraryCall = abi.encodeWithSelector(
+    //         TestERC20.balanceOf.selector,
+    //         address(this),
+    //         address(0),
+    //         1
+    //     );
+    // }
 
     function getInitializeData() internal view returns (bytes memory) {
         return
