@@ -47,13 +47,13 @@ DEPLOYER_PRIVATE_KEY=<Private key in uint256>
 First runs simulation, giving gas costs.
 
 ```bash
-forge script scripts/DeployMultiECDSAFactoryPatchTest.s.sol --sig "run(bytes32 salt)" "0x1" --fork-url
+forge script scripts/DeployMultiECDSAFactoryPatchTest.s.sol --sig "run(bytes32 salt)" "0x1000000000000000000000000000000000000000000000000000000000000000" --fork-url
 ```
 
 Actually broadcasts deploy and setup txs to the network
 
 ```bash
-forge script scripts/DeployMultiECDSAFactoryPatchTest.s.sol --sig "run(bytes32 salt)" "0x1" --fork-url <RPC_URL> --broadcast
+forge script scripts/DeployMultiECDSAFactoryPatchTest.s.sol --sig "run(bytes32 salt)" "0x1000000000000000000000000000000000000000000000000000000000000000" --fork-url <RPC_URL> --broadcast
 ```
 
 This deploys contracts to following deterministic addresses:
@@ -66,13 +66,13 @@ This deploys contracts to following deterministic addresses:
 First runs simulation, giving gas costs.
 
 ```bash
-forge script scripts/DeployMultiECDSAFactoryPatchProd.s.sol --sig "run(bytes32 salt)" "0x2" --fork-url <RPC_URL>
+forge script scripts/DeployMultiECDSAFactoryPatchProd.s.sol --sig "run(bytes32 salt)" "0x2000000000000000000000000000000000000000000000000000000000000000" --fork-url <RPC_URL>
 ```
 
 Actually broadcasts deploy and setup txs to the network
 
 ```bash
-forge script scripts/DeployMultiECDSAFactoryPatchProd.s.sol --sig "run(bytes32 salt)" "0x2" --fork-url <RPC_URL> --broadcast
+forge script scripts/DeployMultiECDSAFactoryPatchProd.s.sol --sig "run(bytes32 salt)" "0x2000000000000000000000000000000000000000000000000000000000000000" --fork-url <RPC_URL> --broadcast
 ```
 
 This deploys contracts to following deterministic addresses:
